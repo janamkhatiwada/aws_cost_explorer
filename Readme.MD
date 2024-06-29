@@ -16,7 +16,6 @@ Also we can see each EC2 instances cost , RDS instances cost and compare them wi
 ## EC2 Cost
 
 ![EC2 Cost](./SS/ec2.png)
-<Image src="./SS/ec2.png" alt="EC2 Cost" />
 
 #### Prerequisites
 
