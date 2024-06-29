@@ -42,15 +42,17 @@ Create a user in aws and assign following IAM permission to that user.
    pip install -r requirements.txt
    ```
 
-3. **Run the Application:**
+3. **Run the Cost report generator:**
    Execute the Python script (`cost.py`) to generate the AWS cost comparison report:
    ```bash
    python cost.py
    ```
 
-This will create a Html file in templates named aws_cost_report.html, you can open this in browser to see detail cost comparison.
-
-The login username and password Can be setup in Login.py.
+4. **Run the Application:**
+   Execute the Python script (`app.py`):
+   ```bash
+   python app.py
+   ```
 
 Default Username: ```admin```
 Default Password : ```password```
