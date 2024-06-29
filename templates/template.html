@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cost Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #50c226;
+        }
+        .forecast {
+            text-align: center;
+            background-color: #d7e9d0;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        .total-cost td {
+            font-weight: bold;
+            background-color: #e2e3e5;
+        }
+        .selectors, .view-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .selectors label, .view-buttons button {
+            margin: 5px 10px;
+        }
+        .selectors select, .view-buttons button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            cursor: pointer;
+        }
+        .view-buttons button {
+            background-color: #2ac842;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        .view-buttons button:hover {
+            background-color: #1e7e30;
+        }
+        @media (max-width: 768px) {
+            .selectors, .view-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            table, th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS Cost Report</h1>
+        <div class="forecast">
+            <h2>This Month's Estimated Cost is: ${{ forecast_cost | round(2) }}</h2>
+        </div>
+        <div class="selectors">
+            <label for="month">Select Month:</label>
+            <select id="month" onchange="filterTable()">
+                {% for key, value in months.items() %}
+                <option value="{{ key }}" {% if value == 'Current Month' %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="view-buttons">
+            <button onclick="showOverallView()">Overall Cost</button>
+            <button onclick="showInstanceView()">EC2 Instance Cost</button>
+            <button onclick="showRdsInstanceView()">RDS Instance Cost</button>
+        </div>
+        <div class="selectors" id="service-selector" style="display: none;">
+            <label for="service">Select Service:</label>
+            <select id="service" onchange="filterTable()">
+                <option value="all" selected>All Services</option>
+                {% for service in overall_services %}
+                <option value="{{ service }}">{{ service }}</option>
+                {% endfor %}
+            </select>
+        </div>        
+        <div class="selectors" id="instance-selector" style="display: none;">
+            <label for="instance">Select EC2 Instance Type:</label>
+            <select id="instance" onchange="filterTable()">
+                <option value="all" selected>All Instances</option>
+                {% for instance in instances %}
+                <option value="{{ instance }}">{{ instance }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="selectors" id="rds-instance-selector" style="display: none;">
+            <label for="rds-instance">Select RDS Instance Type:</label>
+            <select id="rds-instance" onchange="filterTable()">
+                <option value="all" selected>All RDS Instances</option>
+                {% for rds_instance in rds_instances %}
+                <option value="{{ rds_instance }}">{{ rds_instance }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <h2>Cost Breakdown for <span id="selected-month">{{ latest_month }}</span></h2>
+        <div class="table-wrapper">
+            <table id="overall-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Current Month Cost ($)</th>
+                        <th>Previous Month Cost ($)</th>
+                        <th>Cost Change ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in overall_summary %}
+                    <tr data-month="{{ item.TimePeriod }}" data-service="{{ item.Service }}">
+                        <td>{{ item.Service }}</td>
+                        <td>{{ item.Cost | round(2) }}</td>
+                        <td>{{ item.PreviousCost | round(2) }}</td>
+                        <td>{{ item.CostChange | round(2) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-cost">
+                        <td>Total</td>
+                        <td id="total-overall-cost"></td>
+                        <td id="total-overall-previous-cost"></td>
+                        <td id="total-overall-cost-change"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table id="instance-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Instance Type</th>
+                        <th>Current Month Cost ($)</th>
+                        <th>Previous Month Cost ($)</th>
+                        <th>Cost Change ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in ec2_summary %}
+                    <tr data-month="{{ item.TimePeriod }}" data-instance="{{ item.InstanceType }}">
+                        <td>{{ item.InstanceType }}</td>
+                        <td>{{ item.Cost | round(2) }}</td>
+                        <td>{{ item.PreviousCost | round(2) }}</td>
+                        <td>{{ item.CostChange | round(2) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-cost">
+                        <td>Total</td>
+                        <td id="total-instance-cost"></td>
+                        <td id="total-instance-previous-cost"></td>
+                        <td id="total-instance-cost-change"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table id="rds-instance-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Instance Type</th>
+                        <th>Current Month Cost ($)</th>
+                        <th>Previous Month Cost ($)</th>
+                        <th>Cost Change ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in rds_summary %}
+                    <tr data-month="{{ item.TimePeriod }}" data-instance="{{ item.InstanceType }}">
+                        <td>{{ item.InstanceType }}</td>
+                        <td>{{ item.Cost | round(2) }}</td>
+                        <td>{{ item.PreviousCost | round(2) }}</td>
+                        <td>{{ item.CostChange | round(2) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-cost">
+                        <td>Total</td>
+                        <td id="total-rds-instance-cost"></td>
+                        <td id="total-rds-instance-previous-cost"></td>
+                        <td id="total-rds-instance-cost-change"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function filterTable() {
+            var month = document.getElementById('month').value;
+            var service = document.getElementById('service').value;
+            var instance = document.getElementById('instance').value;
+            var rdsInstance = document.getElementById('rds-instance').value;
+            document.getElementById('selected-month').innerText = document.getElementById('month').options[document.getElementById('month').selectedIndex].text;
+            var overallRows = document.querySelectorAll('#overall-table tbody tr');
+            var instanceRows = document.querySelectorAll('#instance-table tbody tr');
+            var rdsInstanceRows = document.querySelectorAll('#rds-instance-table tbody tr');
+            
+            var totalOverallCost = 0, totalOverallPreviousCost = 0, totalOverallCostChange = 0;
+            var totalInstanceCost = 0, totalInstancePreviousCost = 0, totalInstanceCostChange = 0;
+            var totalRdsInstanceCost = 0, totalRdsInstancePreviousCost = 0, totalRdsInstanceCostChange = 0;
+
+            overallRows.forEach(row => {
+                if (!row.classList.contains('total-cost')) {
+                    var rowMonth = row.getAttribute('data-month');
+                    var rowService = row.getAttribute('data-service');
+                    if (rowMonth === month && (service === 'all' || rowService === service)) {
+                        row.style.display = '';
+                        totalOverallCost += parseFloat(row.cells[1].innerText);
+                        totalOverallPreviousCost += parseFloat(row.cells[2].innerText);
+                        totalOverallCostChange += parseFloat(row.cells[3].innerText);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            instanceRows.forEach(row => {
+                if (!row.classList.contains('total-cost')) {
+                    var rowInstance = row.getAttribute('data-instance');
+                    var rowMonth = row.getAttribute('data-month');
+                    if ((instance === 'all' || rowInstance === instance) && rowMonth === month) {
+                        row.style.display = '';
+                        totalInstanceCost += parseFloat(row.cells[1].innerText);
+                        totalInstancePreviousCost += parseFloat(row.cells[2].innerText);
+                        totalInstanceCostChange += parseFloat(row.cells[3].innerText);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            rdsInstanceRows.forEach(row => {
+                if (!row.classList.contains('total-cost')) {
+                    var rowRdsInstance = row.getAttribute('data-instance');
+                    var rowMonth = row.getAttribute('data-month');
+                    if ((rdsInstance === 'all' || rowRdsInstance === rdsInstance) && rowMonth === month) {
+                        row.style.display = '';
+                        totalRdsInstanceCost += parseFloat(row.cells[1].innerText);
+                        totalRdsInstancePreviousCost += parseFloat(row.cells[2].innerText);
+                        totalRdsInstanceCostChange += parseFloat(row.cells[3].innerText);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            document.getElementById('total-overall-cost').innerText = totalOverallCost.toFixed(2);
+            document.getElementById('total-overall-previous-cost').innerText = totalOverallPreviousCost.toFixed(2);
+            document.getElementById('total-overall-cost-change').innerText = totalOverallCostChange.toFixed(2);
+
+            document.getElementById('total-instance-cost').innerText = totalInstanceCost.toFixed(2);
+            document.getElementById('total-instance-previous-cost').innerText = totalInstancePreviousCost.toFixed(2);
+            document.getElementById('total-instance-cost-change').innerText = totalInstanceCostChange.toFixed(2);
+
+            document.getElementById('total-rds-instance-cost').innerText = totalRdsInstanceCost.toFixed(2);
+            document.getElementById('total-rds-instance-previous-cost').innerText = totalRdsInstancePreviousCost.toFixed(2);
+            document.getElementById('total-rds-instance-cost-change').innerText = totalRdsInstanceCostChange.toFixed(2);
+        }
+
+        function showOverallView() {
+            document.getElementById('overall-table').style.display = '';
+            document.getElementById('instance-table').style.display = 'none';
+            document.getElementById('rds-instance-table').style.display = 'none';
+            document.getElementById('service-selector').style.display = 'block';
+            document.getElementById('instance-selector').style.display = 'none';
+            document.getElementById('rds-instance-selector').style.display = 'none';
+        }
+
+        function showInstanceView() {
+            document.getElementById('overall-table').style.display = 'none';
+            document.getElementById('instance-table').style.display = '';
+            document.getElementById('rds-instance-table').style.display = 'none';
+            document.getElementById('service-selector').style.display = 'none';
+            document.getElementById('instance-selector').style.display = 'block';
+            document.getElementById('rds-instance-selector').style.display = 'none';
+        }
+
+        function showRdsInstanceView() {
+            document.getElementById('overall-table').style.display = 'none';
+            document.getElementById('instance-table').style.display = 'none';
+            document.getElementById('rds-instance-table').style.display = '';
+            document.getElementById('service-selector').style.display = 'none';
+            document.getElementById('instance-selector').style.display = 'none';
+            document.getElementById('rds-instance-selector').style.display = 'block';
+        }
+
+        filterTable();
+    </script>
+</body>
+</html>

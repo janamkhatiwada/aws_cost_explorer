@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-cost
+  namespace: aws-cost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aws-cost
+  template:
+    metadata:
+      labels:
+        app: aws-cost
+    spec:
+      containers:
+      - name: aws-cost
+        image: $REPO:$IMAGE_TAG
+        ports:
+        - containerPort: 5000

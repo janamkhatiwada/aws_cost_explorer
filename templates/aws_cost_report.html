@@ -1,0 +1,4484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cost Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #50c226;
+        }
+        .forecast {
+            text-align: center;
+            background-color: #d7e9d0;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        .total-cost td {
+            font-weight: bold;
+            background-color: #e2e3e5;
+        }
+        .selectors, .view-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .selectors label, .view-buttons button {
+            margin: 5px 10px;
+        }
+        .selectors select, .view-buttons button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            cursor: pointer;
+        }
+        .view-buttons button {
+            background-color: #2ac842;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        .view-buttons button:hover {
+            background-color: #1e7e30;
+        }
+        @media (max-width: 768px) {
+            .selectors, .view-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            table, th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS Cost Report</h1>
+        <div class="forecast">
+            <h2>Current Month Estimated Cost is: $11981.7464</h2>
+        </div>
+        <div class="selectors">
+            <label for="month">Select Month:</label>
+            <select id="month" onchange="filterTable()">
+                
+                <option value="2023-06-14" >2023-06-14</option>
+                
+                <option value="2023-07-01" >2023-07-01</option>
+                
+                <option value="2023-08-01" >2023-08-01</option>
+                
+                <option value="2023-09-01" >2023-09-01</option>
+                
+                <option value="2023-10-01" >2023-10-01</option>
+                
+                <option value="2023-11-01" >2023-11-01</option>
+                
+                <option value="2023-12-01" >2023-12-01</option>
+                
+                <option value="2024-01-01" >2024-01-01</option>
+                
+                <option value="2024-02-01" >2024-02-01</option>
+                
+                <option value="2024-03-01" >2024-03-01</option>
+                
+                <option value="2024-04-01" >2024-04-01</option>
+                
+                <option value="2024-05-01" >2024-05-01</option>
+                
+                <option value="2024-06-01" selected>Current Month</option>
+                
+            </select>
+        </div>
+        <div class="view-buttons">
+            <button onclick="showOverallView()">Overall Cost</button>
+            <button onclick="showInstanceView()">EC2 Instance Cost</button>
+            <button onclick="showRdsInstanceView()">RDS Instance Cost</button>
+        </div>
+        <div class="selectors" id="service-selector" style="display: none;">
+            <label for="service">Select Service:</label>
+            <select id="service" onchange="filterTable()">
+                <option value="all" selected>All Services</option>
+                
+                <option value="AWS CloudShell">AWS CloudShell</option>
+                
+                <option value="AWS CloudTrail">AWS CloudTrail</option>
+                
+                <option value="AWS Config">AWS Config</option>
+                
+                <option value="AWS Cost Explorer">AWS Cost Explorer</option>
+                
+                <option value="AWS Database Migration Service">AWS Database Migration Service</option>
+                
+                <option value="AWS Glue">AWS Glue</option>
+                
+                <option value="AWS Key Management Service">AWS Key Management Service</option>
+                
+                <option value="AWS Lambda">AWS Lambda</option>
+                
+                <option value="AWS Migration Hub Refactor Spaces">AWS Migration Hub Refactor Spaces</option>
+                
+                <option value="AWS Secrets Manager">AWS Secrets Manager</option>
+                
+                <option value="AWS Service Catalog">AWS Service Catalog</option>
+                
+                <option value="AWS Systems Manager">AWS Systems Manager</option>
+                
+                <option value="AWS WAF">AWS WAF</option>
+                
+                <option value="AWS X-Ray">AWS X-Ray</option>
+                
+                <option value="Amazon CloudFront">Amazon CloudFront</option>
+                
+                <option value="Amazon DynamoDB">Amazon DynamoDB</option>
+                
+                <option value="Amazon EC2 Container Registry (ECR)">Amazon EC2 Container Registry (ECR)</option>
+                
+                <option value="Amazon ElastiCache">Amazon ElastiCache</option>
+                
+                <option value="Amazon Elastic Compute Cloud - Compute">Amazon Elastic Compute Cloud - Compute</option>
+                
+                <option value="Amazon Elastic Container Registry Public">Amazon Elastic Container Registry Public</option>
+                
+                <option value="Amazon Elastic Container Service for Kubernetes">Amazon Elastic Container Service for Kubernetes</option>
+                
+                <option value="Amazon Elastic Load Balancing">Amazon Elastic Load Balancing</option>
+                
+                <option value="Amazon GuardDuty">Amazon GuardDuty</option>
+                
+                <option value="Amazon Inspector">Amazon Inspector</option>
+                
+                <option value="Amazon Kinesis">Amazon Kinesis</option>
+                
+                <option value="Amazon Location Service">Amazon Location Service</option>
+                
+                <option value="Amazon Relational Database Service">Amazon Relational Database Service</option>
+                
+                <option value="Amazon Simple Email Service">Amazon Simple Email Service</option>
+                
+                <option value="Amazon Simple Notification Service">Amazon Simple Notification Service</option>
+                
+                <option value="Amazon Simple Queue Service">Amazon Simple Queue Service</option>
+                
+                <option value="Amazon Simple Storage Service">Amazon Simple Storage Service</option>
+                
+                <option value="Amazon Virtual Private Cloud">Amazon Virtual Private Cloud</option>
+                
+                <option value="AmazonCloudWatch">AmazonCloudWatch</option>
+                
+                <option value="CloudWatch Events">CloudWatch Events</option>
+                
+                <option value="EC2 - Other">EC2 - Other</option>
+                
+                <option value="Tax">Tax</option>
+                
+            </select>
+        </div>        
+        <div class="selectors" id="instance-selector" style="display: none;">
+            <label for="instance">Select EC2 Instance Type:</label>
+            <select id="instance" onchange="filterTable()">
+                <option value="all" selected>All Instances</option>
+                
+                <option value="NoInstanceType">NoInstanceType</option>
+                
+                <option value="c4.4xlarge">c4.4xlarge</option>
+                
+                <option value="c5.2xlarge">c5.2xlarge</option>
+                
+                <option value="c5.4xlarge">c5.4xlarge</option>
+                
+                <option value="c5.large">c5.large</option>
+                
+                <option value="c5.xlarge">c5.xlarge</option>
+                
+                <option value="c5a.2xlarge">c5a.2xlarge</option>
+                
+                <option value="c5a.4xlarge">c5a.4xlarge</option>
+                
+                <option value="c5a.8xlarge">c5a.8xlarge</option>
+                
+                <option value="c5a.large">c5a.large</option>
+                
+                <option value="c5a.xlarge">c5a.xlarge</option>
+                
+                <option value="m5.large">m5.large</option>
+                
+                <option value="m5.xlarge">m5.xlarge</option>
+                
+                <option value="m5a.8xlarge">m5a.8xlarge</option>
+                
+                <option value="m5a.large">m5a.large</option>
+                
+                <option value="m5a.xlarge">m5a.xlarge</option>
+                
+                <option value="r6a.2xlarge">r6a.2xlarge</option>
+                
+                <option value="r6a.large">r6a.large</option>
+                
+                <option value="t2.medium">t2.medium</option>
+                
+                <option value="t2.micro">t2.micro</option>
+                
+                <option value="t2.small">t2.small</option>
+                
+                <option value="t2.xlarge">t2.xlarge</option>
+                
+                <option value="t3.large">t3.large</option>
+                
+                <option value="t3.micro">t3.micro</option>
+                
+                <option value="t3.small">t3.small</option>
+                
+                <option value="t3.xlarge">t3.xlarge</option>
+                
+                <option value="t3a.2xlarge">t3a.2xlarge</option>
+                
+                <option value="t3a.medium">t3a.medium</option>
+                
+                <option value="t3a.xlarge">t3a.xlarge</option>
+                
+            </select>
+        </div>
+        <div class="selectors" id="rds-instance-selector" style="display: none;">
+            <label for="rds-instance">Select RDS Instance Type:</label>
+            <select id="rds-instance" onchange="filterTable()">
+                <option value="all" selected>All RDS Instances</option>
+                
+                <option value="NoInstanceType">NoInstanceType</option>
+                
+                <option value="db.m5.2xlarge">db.m5.2xlarge</option>
+                
+                <option value="db.m5.4xlarge">db.m5.4xlarge</option>
+                
+                <option value="db.m5.8xlarge">db.m5.8xlarge</option>
+                
+                <option value="db.m5.large">db.m5.large</option>
+                
+                <option value="db.m5.xlarge">db.m5.xlarge</option>
+                
+                <option value="db.m5d.4xlarge">db.m5d.4xlarge</option>
+                
+                <option value="db.m6g.2xlarge">db.m6g.2xlarge</option>
+                
+                <option value="db.m6g.4xlarge">db.m6g.4xlarge</option>
+                
+                <option value="db.m6g.xlarge">db.m6g.xlarge</option>
+                
+                <option value="db.m6gd.4xlarge">db.m6gd.4xlarge</option>
+                
+                <option value="db.m6gd.large">db.m6gd.large</option>
+                
+                <option value="db.t4g.medium">db.t4g.medium</option>
+                
+                <option value="db.t4g.xlarge">db.t4g.xlarge</option>
+                
+            </select>
+        </div>
+        <h2>Cost Breakdown for <span id="selected-month">Current Month</span></h2>
+        <div class="table-wrapper">
+            <table id="overall-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Current Month Cost ($)</th>
+                        <th>Previous Month Cost ($)</th>
+                        <th>Cost Change ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr data-month="2023-06-14" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>0.001</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>1.6761</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>3.3234</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.3323</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>0.4812</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>78.4991</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>1982.3063</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>30.192</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>110.9041</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>6.1864</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>230.7591</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.7849</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Simple Queue Service">
+                        <td>Amazon Simple Queue Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>5.8194</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>21.7472</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>109.6791</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0001</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>313.1991</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>0.0</td>
+                        <td>0.001</td>
+                        <td>-0.001</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>5.9357</td>
+                        <td>3.3234</td>
+                        <td>2.6123</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5896</td>
+                        <td>0.3323</td>
+                        <td>0.2573</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>0.4929</td>
+                        <td>0.4812</td>
+                        <td>0.0117</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>143.1456</td>
+                        <td>78.4991</td>
+                        <td>64.6465</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>3592.7842</td>
+                        <td>1982.3063</td>
+                        <td>1610.4779</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>55.056</td>
+                        <td>30.192</td>
+                        <td>24.864</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>221.5439</td>
+                        <td>110.9041</td>
+                        <td>110.6398</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>2.0572</td>
+                        <td>6.1864</td>
+                        <td>-4.1292</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>639.9456</td>
+                        <td>230.7591</td>
+                        <td>409.1865</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>1.4017</td>
+                        <td>0.7849</td>
+                        <td>0.6168</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>10.9426</td>
+                        <td>5.8194</td>
+                        <td>5.1232</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>39.6481</td>
+                        <td>21.7472</td>
+                        <td>17.9009</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>213.7853</td>
+                        <td>109.6791</td>
+                        <td>104.1062</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0001</td>
+                        <td>0.0001</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>639.3503</td>
+                        <td>313.1991</td>
+                        <td>326.1512</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1057.66</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>3.7</td>
+                        <td>1.6761</td>
+                        <td>2.0239</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0004</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>5.9355</td>
+                        <td>5.9357</td>
+                        <td>-0.0002</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5856</td>
+                        <td>0.5896</td>
+                        <td>-0.004</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>0.773</td>
+                        <td>0.4929</td>
+                        <td>0.2801</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>122.766</td>
+                        <td>143.1456</td>
+                        <td>-20.3796</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>3536.6713</td>
+                        <td>3592.7842</td>
+                        <td>-56.1129</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>55.056</td>
+                        <td>55.056</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>206.3587</td>
+                        <td>221.5439</td>
+                        <td>-15.1852</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>10.5968</td>
+                        <td>2.0572</td>
+                        <td>8.5396</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>82.0359</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>565.0766</td>
+                        <td>639.9456</td>
+                        <td>-74.869</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>1.0466</td>
+                        <td>1.4017</td>
+                        <td>-0.3551</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>18.6674</td>
+                        <td>10.9426</td>
+                        <td>7.7248</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>39.6499</td>
+                        <td>39.6481</td>
+                        <td>0.0018</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>173.4513</td>
+                        <td>213.7853</td>
+                        <td>-40.334</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0003</td>
+                        <td>0.0001</td>
+                        <td>0.0002</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>805.6181</td>
+                        <td>639.3503</td>
+                        <td>166.2678</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1069.34</td>
+                        <td>1057.66</td>
+                        <td>11.68</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>3.7599</td>
+                        <td>3.7</td>
+                        <td>0.0599</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0011</td>
+                        <td>0.0004</td>
+                        <td>0.0007</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>6.4914</td>
+                        <td>5.9355</td>
+                        <td>0.5559</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5895</td>
+                        <td>0.5856</td>
+                        <td>0.0039</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>3.4758</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon CloudFront">
+                        <td>Amazon CloudFront</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>0.91</td>
+                        <td>0.773</td>
+                        <td>0.137</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>80.9856</td>
+                        <td>122.766</td>
+                        <td>-41.7804</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>4437.2712</td>
+                        <td>3536.6713</td>
+                        <td>900.5999</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>53.28</td>
+                        <td>55.056</td>
+                        <td>-1.776</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>189.214</td>
+                        <td>206.3587</td>
+                        <td>-17.1447</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>8.695</td>
+                        <td>10.5968</td>
+                        <td>-1.9018</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>100.2954</td>
+                        <td>82.0359</td>
+                        <td>18.2595</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>921.0621</td>
+                        <td>565.0766</td>
+                        <td>355.9855</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>1.0038</td>
+                        <td>1.0466</td>
+                        <td>-0.0428</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>23.6876</td>
+                        <td>18.6674</td>
+                        <td>5.0202</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>38.4612</td>
+                        <td>39.6499</td>
+                        <td>-1.1887</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>163.803</td>
+                        <td>173.4513</td>
+                        <td>-9.6483</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0002</td>
+                        <td>0.0003</td>
+                        <td>-0.0001</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>942.8011</td>
+                        <td>805.6181</td>
+                        <td>137.183</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>0.0</td>
+                        <td>1069.34</td>
+                        <td>-1069.34</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>6.4691</td>
+                        <td>3.7599</td>
+                        <td>2.7092</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS Database Migration Service">
+                        <td>AWS Database Migration Service</td>
+                        <td>403.3603</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0004</td>
+                        <td>0.0011</td>
+                        <td>-0.0007</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>7.4181</td>
+                        <td>6.4914</td>
+                        <td>0.9267</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5888</td>
+                        <td>0.5895</td>
+                        <td>-0.0007</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>3.4758</td>
+                        <td>2.4442</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>1.427</td>
+                        <td>0.91</td>
+                        <td>0.517</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>83.6851</td>
+                        <td>80.9856</td>
+                        <td>2.6995</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>4362.2451</td>
+                        <td>4437.2712</td>
+                        <td>-75.0261</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>55.056</td>
+                        <td>53.28</td>
+                        <td>1.776</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>189.8018</td>
+                        <td>189.214</td>
+                        <td>0.5878</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>14.4892</td>
+                        <td>8.695</td>
+                        <td>5.7942</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>103.9855</td>
+                        <td>100.2954</td>
+                        <td>3.6901</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>2051.5127</td>
+                        <td>921.0621</td>
+                        <td>1130.4506</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>1.2927</td>
+                        <td>1.0038</td>
+                        <td>0.2889</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>11.8475</td>
+                        <td>23.6876</td>
+                        <td>-11.8401</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>39.6907</td>
+                        <td>38.4612</td>
+                        <td>1.2295</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>137.1088</td>
+                        <td>163.803</td>
+                        <td>-26.6942</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0002</td>
+                        <td>0.0002</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1140.8017</td>
+                        <td>942.8011</td>
+                        <td>198.0006</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1637.17</td>
+                        <td>0.0</td>
+                        <td>1637.17</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>6.8872</td>
+                        <td>6.4691</td>
+                        <td>0.4181</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS Database Migration Service">
+                        <td>AWS Database Migration Service</td>
+                        <td>36.1305</td>
+                        <td>403.3603</td>
+                        <td>-367.2298</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0</td>
+                        <td>0.0004</td>
+                        <td>-0.0004</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>7.4181</td>
+                        <td>7.4181</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5904</td>
+                        <td>0.5888</td>
+                        <td>0.0016</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>3.7457</td>
+                        <td>1.427</td>
+                        <td>2.3187</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>80.9856</td>
+                        <td>83.6851</td>
+                        <td>-2.6995</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>7055.7383</td>
+                        <td>4362.2451</td>
+                        <td>2693.4932</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>53.28</td>
+                        <td>55.056</td>
+                        <td>-1.776</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>284.8019</td>
+                        <td>189.8018</td>
+                        <td>95.0001</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>37.2146</td>
+                        <td>14.4892</td>
+                        <td>22.7254</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>100.5561</td>
+                        <td>103.9855</td>
+                        <td>-3.4294</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>2993.753</td>
+                        <td>2051.5127</td>
+                        <td>942.2403</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>1.3996</td>
+                        <td>1.2927</td>
+                        <td>0.1069</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>8.4838</td>
+                        <td>11.8475</td>
+                        <td>-3.3637</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>38.7278</td>
+                        <td>39.6907</td>
+                        <td>-0.9629</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>281.4838</td>
+                        <td>137.1088</td>
+                        <td>144.375</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0012</td>
+                        <td>0.0002</td>
+                        <td>0.001</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1523.1273</td>
+                        <td>1140.8017</td>
+                        <td>382.3256</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>2378.83</td>
+                        <td>1637.17</td>
+                        <td>741.66</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>29.8808</td>
+                        <td>0.0</td>
+                        <td>29.8808</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>7.2416</td>
+                        <td>6.8872</td>
+                        <td>0.3544</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0003</td>
+                        <td>0.0</td>
+                        <td>0.0003</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>7.8453</td>
+                        <td>7.4181</td>
+                        <td>0.4272</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.588</td>
+                        <td>0.5904</td>
+                        <td>-0.0024</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>5.8015</td>
+                        <td>3.7457</td>
+                        <td>2.0558</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>83.6851</td>
+                        <td>80.9856</td>
+                        <td>2.6995</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>8247.6053</td>
+                        <td>7055.7383</td>
+                        <td>1191.867</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>55.056</td>
+                        <td>53.28</td>
+                        <td>1.776</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>297.5775</td>
+                        <td>284.8019</td>
+                        <td>12.7756</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>36.4524</td>
+                        <td>37.2146</td>
+                        <td>-0.7622</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>105.0711</td>
+                        <td>100.5561</td>
+                        <td>4.515</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>3011.0102</td>
+                        <td>2993.753</td>
+                        <td>17.2572</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.3292</td>
+                        <td>1.3996</td>
+                        <td>-1.0704</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>7.9742</td>
+                        <td>8.4838</td>
+                        <td>-0.5096</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>39.7816</td>
+                        <td>38.7278</td>
+                        <td>1.0538</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>303.4746</td>
+                        <td>281.4838</td>
+                        <td>21.9908</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0007</td>
+                        <td>0.0012</td>
+                        <td>-0.0005</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1768.2675</td>
+                        <td>1523.1273</td>
+                        <td>245.1402</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>2662.57</td>
+                        <td>2378.83</td>
+                        <td>283.74</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>59.998</td>
+                        <td>29.8808</td>
+                        <td>30.1172</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>8.4168</td>
+                        <td>7.2416</td>
+                        <td>1.1752</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0226</td>
+                        <td>0.0003</td>
+                        <td>0.0223</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>8.1573</td>
+                        <td>7.8453</td>
+                        <td>0.312</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5881</td>
+                        <td>0.588</td>
+                        <td>0.0001</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>8.2776</td>
+                        <td>5.8015</td>
+                        <td>2.4761</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>83.6851</td>
+                        <td>83.6851</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>7637.5533</td>
+                        <td>8247.6053</td>
+                        <td>-610.052</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>55.056</td>
+                        <td>55.056</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>285.9725</td>
+                        <td>297.5775</td>
+                        <td>-11.605</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>33.7958</td>
+                        <td>36.4524</td>
+                        <td>-2.6566</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>104.609</td>
+                        <td>105.0711</td>
+                        <td>-0.4621</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>3011.2084</td>
+                        <td>3011.0102</td>
+                        <td>0.1982</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.296</td>
+                        <td>0.3292</td>
+                        <td>-0.0332</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Simple Queue Service">
+                        <td>Amazon Simple Queue Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>11.8045</td>
+                        <td>7.9742</td>
+                        <td>3.8303</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>39.749</td>
+                        <td>39.7816</td>
+                        <td>-0.0326</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>280.098</td>
+                        <td>303.4746</td>
+                        <td>-23.3766</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0015</td>
+                        <td>0.0007</td>
+                        <td>0.0008</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1604.2134</td>
+                        <td>1768.2675</td>
+                        <td>-164.0541</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1801.84</td>
+                        <td>2662.57</td>
+                        <td>-860.73</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>27.5175</td>
+                        <td>59.998</td>
+                        <td>-32.4805</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>9.5453</td>
+                        <td>8.4168</td>
+                        <td>1.1285</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS Database Migration Service">
+                        <td>AWS Database Migration Service</td>
+                        <td>8.7357</td>
+                        <td>36.1305</td>
+                        <td>-27.3948</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.014</td>
+                        <td>0.0226</td>
+                        <td>-0.0086</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>8.168</td>
+                        <td>8.1573</td>
+                        <td>0.0107</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.586</td>
+                        <td>0.5881</td>
+                        <td>-0.0021</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>12.1165</td>
+                        <td>8.2776</td>
+                        <td>3.8389</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>78.2861</td>
+                        <td>83.6851</td>
+                        <td>-5.399</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>7238.5089</td>
+                        <td>7637.5533</td>
+                        <td>-399.0444</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>51.504</td>
+                        <td>55.056</td>
+                        <td>-3.552</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>273.4161</td>
+                        <td>285.9725</td>
+                        <td>-12.5564</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>30.6508</td>
+                        <td>33.7958</td>
+                        <td>-3.145</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>93.9999</td>
+                        <td>104.609</td>
+                        <td>-10.6091</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>2952.6683</td>
+                        <td>3011.2084</td>
+                        <td>-58.5401</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.214</td>
+                        <td>0.296</td>
+                        <td>-0.082</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>13.7386</td>
+                        <td>11.8045</td>
+                        <td>1.9341</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>91.1805</td>
+                        <td>39.749</td>
+                        <td>51.4315</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>235.3194</td>
+                        <td>280.098</td>
+                        <td>-44.7786</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0009</td>
+                        <td>0.0015</td>
+                        <td>-0.0006</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1586.856</td>
+                        <td>1604.2134</td>
+                        <td>-17.3574</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>2414.68</td>
+                        <td>1801.84</td>
+                        <td>612.84</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>30.9049</td>
+                        <td>27.5175</td>
+                        <td>3.3874</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>10.2083</td>
+                        <td>9.5453</td>
+                        <td>0.663</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Cost Explorer">
+                        <td>AWS Cost Explorer</td>
+                        <td>0.0518</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0179</td>
+                        <td>0.014</td>
+                        <td>0.0039</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>8.171</td>
+                        <td>8.168</td>
+                        <td>0.003</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Lambda">
+                        <td>AWS Lambda</td>
+                        <td>0.0006</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Migration Hub Refactor Spaces">
+                        <td>AWS Migration Hub Refactor Spaces</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5888</td>
+                        <td>0.586</td>
+                        <td>0.0028</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Service Catalog">
+                        <td>AWS Service Catalog</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS Systems Manager">
+                        <td>AWS Systems Manager</td>
+                        <td>0.0001</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AWS X-Ray">
+                        <td>AWS X-Ray</td>
+                        <td>0.0017</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon DynamoDB">
+                        <td>Amazon DynamoDB</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>10.1393</td>
+                        <td>12.1165</td>
+                        <td>-1.9772</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>83.6851</td>
+                        <td>78.2861</td>
+                        <td>5.399</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>3522.2991</td>
+                        <td>7238.5089</td>
+                        <td>-3716.2098</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>55.056</td>
+                        <td>51.504</td>
+                        <td>3.552</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>294.348</td>
+                        <td>273.4161</td>
+                        <td>20.9319</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon GuardDuty">
+                        <td>Amazon GuardDuty</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>43.1568</td>
+                        <td>30.6508</td>
+                        <td>12.506</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>100.447</td>
+                        <td>93.9999</td>
+                        <td>6.4471</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Location Service">
+                        <td>Amazon Location Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>2765.5795</td>
+                        <td>2952.6683</td>
+                        <td>-187.0888</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.2221</td>
+                        <td>0.214</td>
+                        <td>0.0081</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Simple Queue Service">
+                        <td>Amazon Simple Queue Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>16.4787</td>
+                        <td>13.7386</td>
+                        <td>2.7401</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>97.4636</td>
+                        <td>91.1805</td>
+                        <td>6.2831</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>125.2601</td>
+                        <td>235.3194</td>
+                        <td>-110.0593</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0029</td>
+                        <td>0.0009</td>
+                        <td>0.002</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1745.8192</td>
+                        <td>1586.856</td>
+                        <td>158.9632</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1694.0</td>
+                        <td>2414.68</td>
+                        <td>-720.68</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>43.1502</td>
+                        <td>30.9049</td>
+                        <td>12.2453</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>9.9819</td>
+                        <td>10.2083</td>
+                        <td>-0.2264</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Cost Explorer">
+                        <td>AWS Cost Explorer</td>
+                        <td>0.2886</td>
+                        <td>0.0518</td>
+                        <td>0.2368</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0245</td>
+                        <td>0.0179</td>
+                        <td>0.0066</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>8.6759</td>
+                        <td>8.171</td>
+                        <td>0.5049</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Lambda">
+                        <td>AWS Lambda</td>
+                        <td>0.0002</td>
+                        <td>0.0006</td>
+                        <td>-0.0004</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Migration Hub Refactor Spaces">
+                        <td>AWS Migration Hub Refactor Spaces</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.5862</td>
+                        <td>0.5888</td>
+                        <td>-0.0026</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Service Catalog">
+                        <td>AWS Service Catalog</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS Systems Manager">
+                        <td>AWS Systems Manager</td>
+                        <td>0.0</td>
+                        <td>0.0001</td>
+                        <td>-0.0001</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AWS X-Ray">
+                        <td>AWS X-Ray</td>
+                        <td>0.0022</td>
+                        <td>0.0017</td>
+                        <td>0.0005</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>12.4769</td>
+                        <td>10.1393</td>
+                        <td>2.3376</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>80.9856</td>
+                        <td>83.6851</td>
+                        <td>-2.6995</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>4046.2278</td>
+                        <td>3522.2991</td>
+                        <td>523.9287</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>90.0129</td>
+                        <td>55.056</td>
+                        <td>34.9569</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>322.6968</td>
+                        <td>294.348</td>
+                        <td>28.3488</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon GuardDuty">
+                        <td>Amazon GuardDuty</td>
+                        <td>112.171</td>
+                        <td>0.0</td>
+                        <td>112.171</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>51.0452</td>
+                        <td>43.1568</td>
+                        <td>7.8884</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>97.2585</td>
+                        <td>100.447</td>
+                        <td>-3.1885</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Location Service">
+                        <td>Amazon Location Service</td>
+                        <td>0.0013</td>
+                        <td>0.0</td>
+                        <td>0.0013</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>2644.5531</td>
+                        <td>2765.5795</td>
+                        <td>-121.0264</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.3027</td>
+                        <td>0.2221</td>
+                        <td>0.0806</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Simple Queue Service">
+                        <td>Amazon Simple Queue Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>20.5708</td>
+                        <td>16.4787</td>
+                        <td>4.0921</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>107.2117</td>
+                        <td>97.4636</td>
+                        <td>9.7481</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>127.6155</td>
+                        <td>125.2601</td>
+                        <td>2.3554</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0048</td>
+                        <td>0.0029</td>
+                        <td>0.0019</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>1929.639</td>
+                        <td>1745.8192</td>
+                        <td>183.8198</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>0.0</td>
+                        <td>1694.0</td>
+                        <td>-1694.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS CloudShell">
+                        <td>AWS CloudShell</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>49.0984</td>
+                        <td>43.1502</td>
+                        <td>5.9482</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>10.3689</td>
+                        <td>9.9819</td>
+                        <td>0.387</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Cost Explorer">
+                        <td>AWS Cost Explorer</td>
+                        <td>0.2294</td>
+                        <td>0.2886</td>
+                        <td>-0.0592</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0</td>
+                        <td>0.0245</td>
+                        <td>-0.0245</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>8.9254</td>
+                        <td>8.6759</td>
+                        <td>0.2495</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Lambda">
+                        <td>AWS Lambda</td>
+                        <td>0.0002</td>
+                        <td>0.0002</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Migration Hub Refactor Spaces">
+                        <td>AWS Migration Hub Refactor Spaces</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.588</td>
+                        <td>0.5862</td>
+                        <td>0.0018</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>5.92</td>
+                        <td>5.92</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AWS X-Ray">
+                        <td>AWS X-Ray</td>
+                        <td>0.0027</td>
+                        <td>0.0022</td>
+                        <td>0.0005</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>15.4748</td>
+                        <td>12.4769</td>
+                        <td>2.9979</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>83.6851</td>
+                        <td>80.9856</td>
+                        <td>2.6995</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>5074.127</td>
+                        <td>4046.2278</td>
+                        <td>1027.8992</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>110.112</td>
+                        <td>90.0129</td>
+                        <td>20.0991</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>304.3076</td>
+                        <td>322.6968</td>
+                        <td>-18.3892</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon GuardDuty">
+                        <td>Amazon GuardDuty</td>
+                        <td>552.1463</td>
+                        <td>112.171</td>
+                        <td>439.9753</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>89.984</td>
+                        <td>51.0452</td>
+                        <td>38.9388</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>100.8707</td>
+                        <td>97.2585</td>
+                        <td>3.6122</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Location Service">
+                        <td>Amazon Location Service</td>
+                        <td>0.0013</td>
+                        <td>0.0013</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>2518.2131</td>
+                        <td>2644.5531</td>
+                        <td>-126.34</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.2253</td>
+                        <td>0.3027</td>
+                        <td>-0.0774</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Simple Queue Service">
+                        <td>Amazon Simple Queue Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>22.1129</td>
+                        <td>20.5708</td>
+                        <td>1.5421</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>121.6964</td>
+                        <td>107.2117</td>
+                        <td>14.4847</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>195.4226</td>
+                        <td>127.6155</td>
+                        <td>67.8071</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0042</td>
+                        <td>0.0048</td>
+                        <td>-0.0006</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>2181.5084</td>
+                        <td>1929.639</td>
+                        <td>251.8694</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1878.79</td>
+                        <td>0.0</td>
+                        <td>1878.79</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS CloudTrail">
+                        <td>AWS CloudTrail</td>
+                        <td>19.4511</td>
+                        <td>49.0984</td>
+                        <td>-29.6473</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Config">
+                        <td>AWS Config</td>
+                        <td>4.0138</td>
+                        <td>10.3689</td>
+                        <td>-6.3551</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Cost Explorer">
+                        <td>AWS Cost Explorer</td>
+                        <td>2.5308</td>
+                        <td>0.2294</td>
+                        <td>2.3014</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Glue">
+                        <td>AWS Glue</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Key Management Service">
+                        <td>AWS Key Management Service</td>
+                        <td>3.5199</td>
+                        <td>8.9254</td>
+                        <td>-5.4055</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Lambda">
+                        <td>AWS Lambda</td>
+                        <td>0.0</td>
+                        <td>0.0002</td>
+                        <td>-0.0002</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Migration Hub Refactor Spaces">
+                        <td>AWS Migration Hub Refactor Spaces</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS Secrets Manager">
+                        <td>AWS Secrets Manager</td>
+                        <td>0.2343</td>
+                        <td>0.588</td>
+                        <td>-0.3537</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS WAF">
+                        <td>AWS WAF</td>
+                        <td>2.3434</td>
+                        <td>5.92</td>
+                        <td>-3.5766</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AWS X-Ray">
+                        <td>AWS X-Ray</td>
+                        <td>0.001</td>
+                        <td>0.0027</td>
+                        <td>-0.0017</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon EC2 Container Registry (ECR)">
+                        <td>Amazon EC2 Container Registry (ECR)</td>
+                        <td>7.7313</td>
+                        <td>15.4748</td>
+                        <td>-7.7435</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon ElastiCache">
+                        <td>Amazon ElastiCache</td>
+                        <td>32.0568</td>
+                        <td>83.6851</td>
+                        <td>-51.6283</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Elastic Compute Cloud - Compute">
+                        <td>Amazon Elastic Compute Cloud - Compute</td>
+                        <td>2753.565</td>
+                        <td>5074.127</td>
+                        <td>-2320.562</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Elastic Container Registry Public">
+                        <td>Amazon Elastic Container Registry Public</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Elastic Container Service for Kubernetes">
+                        <td>Amazon Elastic Container Service for Kubernetes</td>
+                        <td>42.18</td>
+                        <td>110.112</td>
+                        <td>-67.932</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Elastic Load Balancing">
+                        <td>Amazon Elastic Load Balancing</td>
+                        <td>121.8404</td>
+                        <td>304.3076</td>
+                        <td>-182.4672</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon GuardDuty">
+                        <td>Amazon GuardDuty</td>
+                        <td>263.592</td>
+                        <td>552.1463</td>
+                        <td>-288.5543</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Inspector">
+                        <td>Amazon Inspector</td>
+                        <td>31.3908</td>
+                        <td>89.984</td>
+                        <td>-58.5932</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Kinesis">
+                        <td>Amazon Kinesis</td>
+                        <td>38.7816</td>
+                        <td>100.8707</td>
+                        <td>-62.0891</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Location Service">
+                        <td>Amazon Location Service</td>
+                        <td>0.0</td>
+                        <td>0.0013</td>
+                        <td>-0.0013</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Relational Database Service">
+                        <td>Amazon Relational Database Service</td>
+                        <td>1520.5122</td>
+                        <td>2518.2131</td>
+                        <td>-997.7009</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Simple Email Service">
+                        <td>Amazon Simple Email Service</td>
+                        <td>0.0842</td>
+                        <td>0.2253</td>
+                        <td>-0.1411</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Simple Notification Service">
+                        <td>Amazon Simple Notification Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Simple Queue Service">
+                        <td>Amazon Simple Queue Service</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Simple Storage Service">
+                        <td>Amazon Simple Storage Service</td>
+                        <td>9.1024</td>
+                        <td>22.1129</td>
+                        <td>-13.0105</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Amazon Virtual Private Cloud">
+                        <td>Amazon Virtual Private Cloud</td>
+                        <td>46.7851</td>
+                        <td>121.6964</td>
+                        <td>-74.9113</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="AmazonCloudWatch">
+                        <td>AmazonCloudWatch</td>
+                        <td>75.5624</td>
+                        <td>195.4226</td>
+                        <td>-119.8602</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="CloudWatch Events">
+                        <td>CloudWatch Events</td>
+                        <td>0.0021</td>
+                        <td>0.0042</td>
+                        <td>-0.0021</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="EC2 - Other">
+                        <td>EC2 - Other</td>
+                        <td>815.4391</td>
+                        <td>2181.5084</td>
+                        <td>-1366.0693</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-service="Tax">
+                        <td>Tax</td>
+                        <td>1100.23</td>
+                        <td>1878.79</td>
+                        <td>-778.56</td>
+                    </tr>
+                    
+                    <tr class="total-cost">
+                        <td>Total</td>
+                        <td id="total-overall-cost"></td>
+                        <td id="total-overall-previous-cost"></td>
+                        <td id="total-overall-cost-change"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table id="instance-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Instance Type</th>
+                        <th>Current Month Cost ($)</th>
+                        <th>Previous Month Cost ($)</th>
+                        <th>Cost Change ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr data-month="2023-06-14" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>7.8098</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="c5.large">
+                        <td>c5.large</td>
+                        <td>263.5762</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>117.145</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>1260.8179</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>105.0682</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="t2.small">
+                        <td>t2.small</td>
+                        <td>24.2744</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="t3.micro">
+                        <td>t3.micro</td>
+                        <td>3.623</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>173.9059</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>26.0859</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>18.0886</td>
+                        <td>7.8098</td>
+                        <td>10.2788</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="c5.large">
+                        <td>c5.large</td>
+                        <td>480.6717</td>
+                        <td>263.5762</td>
+                        <td>217.0955</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>139.3361</td>
+                        <td>117.145</td>
+                        <td>22.1911</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>3.4659</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>2299.1386</td>
+                        <td>1260.8179</td>
+                        <td>1038.3207</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>191.5949</td>
+                        <td>105.0682</td>
+                        <td>86.5267</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="t2.small">
+                        <td>t2.small</td>
+                        <td>44.265</td>
+                        <td>24.2744</td>
+                        <td>19.9906</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="t3.micro">
+                        <td>t3.micro</td>
+                        <td>6.6067</td>
+                        <td>3.623</td>
+                        <td>2.9837</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>317.1226</td>
+                        <td>173.9059</td>
+                        <td>143.2167</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>92.4941</td>
+                        <td>26.0859</td>
+                        <td>66.4082</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>34.9718</td>
+                        <td>18.0886</td>
+                        <td>16.8832</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c4.4xlarge">
+                        <td>c4.4xlarge</td>
+                        <td>0.0329</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>3.0988</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5.large">
+                        <td>c5.large</td>
+                        <td>238.4679</td>
+                        <td>480.6717</td>
+                        <td>-242.2038</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>52.9686</td>
+                        <td>139.3361</td>
+                        <td>-86.3675</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>191.5949</td>
+                        <td>3.4659</td>
+                        <td>188.129</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>103.523</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>2301.0894</td>
+                        <td>2299.1386</td>
+                        <td>1.9508</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>191.5949</td>
+                        <td>191.5949</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="t2.micro">
+                        <td>t2.micro</td>
+                        <td>0.0002</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="t2.small">
+                        <td>t2.small</td>
+                        <td>27.1973</td>
+                        <td>44.265</td>
+                        <td>-17.0677</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="t3.micro">
+                        <td>t3.micro</td>
+                        <td>6.6067</td>
+                        <td>6.6067</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>316.9805</td>
+                        <td>317.1226</td>
+                        <td>-0.1421</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>68.5444</td>
+                        <td>92.4941</td>
+                        <td>-23.9497</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>19.6457</td>
+                        <td>34.9718</td>
+                        <td>-15.3261</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>0.0</td>
+                        <td>3.0988</td>
+                        <td>-3.0988</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>0.0</td>
+                        <td>191.5949</td>
+                        <td>-191.5949</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>0.0</td>
+                        <td>103.523</td>
+                        <td>-103.523</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>0.0</td>
+                        <td>2301.0894</td>
+                        <td>-2301.0894</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>0.0</td>
+                        <td>191.5949</td>
+                        <td>-191.5949</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="t3.micro">
+                        <td>t3.micro</td>
+                        <td>0.0</td>
+                        <td>6.6067</td>
+                        <td>-6.6067</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>0.0</td>
+                        <td>316.9805</td>
+                        <td>-316.9805</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>0.0</td>
+                        <td>68.5444</td>
+                        <td>-68.5444</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>25.7222</td>
+                        <td>19.6457</td>
+                        <td>6.0765</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>17.1143</td>
+                        <td>0.0</td>
+                        <td>17.1143</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>191.5949</td>
+                        <td>0.0</td>
+                        <td>191.5949</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>468.4166</td>
+                        <td>0.0</td>
+                        <td>468.4166</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>3066.8403</td>
+                        <td>0.0</td>
+                        <td>3066.8403</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>191.5949</td>
+                        <td>0.0</td>
+                        <td>191.5949</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>36.9408</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="t3.micro">
+                        <td>t3.micro</td>
+                        <td>1.9728</td>
+                        <td>0.0</td>
+                        <td>1.9728</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>317.1226</td>
+                        <td>0.0</td>
+                        <td>317.1226</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>44.9257</td>
+                        <td>0.0</td>
+                        <td>44.9257</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>54.3837</td>
+                        <td>25.7222</td>
+                        <td>28.6615</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>0.5974</td>
+                        <td>17.1143</td>
+                        <td>-16.5169</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>185.4144</td>
+                        <td>191.5949</td>
+                        <td>-6.1805</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>370.8288</td>
+                        <td>468.4166</td>
+                        <td>-97.5878</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>5859.7139</td>
+                        <td>3066.8403</td>
+                        <td>2792.8736</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>185.4144</td>
+                        <td>191.5949</td>
+                        <td>-6.1805</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>51.1488</td>
+                        <td>36.9408</td>
+                        <td>14.208</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="t3.micro">
+                        <td>t3.micro</td>
+                        <td>0.2354</td>
+                        <td>1.9728</td>
+                        <td>-1.7374</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>306.7507</td>
+                        <td>317.1226</td>
+                        <td>-10.3719</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>41.2508</td>
+                        <td>44.9257</td>
+                        <td>-3.6749</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>55.751</td>
+                        <td>54.3837</td>
+                        <td>1.3673</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>0.5232</td>
+                        <td>0.5974</td>
+                        <td>-0.0742</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>254.9626</td>
+                        <td>52.9686</td>
+                        <td>201.994</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>77.8082</td>
+                        <td>185.4144</td>
+                        <td>-107.6062</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>383.1898</td>
+                        <td>370.8288</td>
+                        <td>12.361</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>6141.876</td>
+                        <td>5859.7139</td>
+                        <td>282.1621</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>420.2726</td>
+                        <td>185.4144</td>
+                        <td>234.8582</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="r6a.2xlarge">
+                        <td>r6a.2xlarge</td>
+                        <td>719.1521</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>52.8538</td>
+                        <td>51.1488</td>
+                        <td>1.705</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="t3.xlarge">
+                        <td>t3.xlarge</td>
+                        <td>117.4318</td>
+                        <td>306.7507</td>
+                        <td>-189.3189</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>23.7842</td>
+                        <td>41.2508</td>
+                        <td>-17.4666</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>62.6515</td>
+                        <td>55.751</td>
+                        <td>6.9005</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>18.9732</td>
+                        <td>0.5232</td>
+                        <td>18.45</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>320.4259</td>
+                        <td>254.9626</td>
+                        <td>65.4633</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>2.6718</td>
+                        <td>77.8082</td>
+                        <td>-75.1364</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>383.1898</td>
+                        <td>383.1898</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>2381.2786</td>
+                        <td>6141.876</td>
+                        <td>-3760.5974</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>478.9872</td>
+                        <td>420.2726</td>
+                        <td>58.7146</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="m5.large">
+                        <td>m5.large</td>
+                        <td>2.9785</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="m5.xlarge">
+                        <td>m5.xlarge</td>
+                        <td>6.6335</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="r6a.2xlarge">
+                        <td>r6a.2xlarge</td>
+                        <td>903.7993</td>
+                        <td>719.1521</td>
+                        <td>184.6472</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>52.7827</td>
+                        <td>52.8538</td>
+                        <td>-0.0711</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="t3.small">
+                        <td>t3.small</td>
+                        <td>7.0685</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>23.7842</td>
+                        <td>23.7842</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>67.6282</td>
+                        <td>62.6515</td>
+                        <td>4.9767</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>17.9325</td>
+                        <td>18.9732</td>
+                        <td>-1.0407</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>272.4441</td>
+                        <td>320.4259</td>
+                        <td>-47.9818</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>2.5205</td>
+                        <td>2.6718</td>
+                        <td>-0.1513</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>618.4251</td>
+                        <td>383.1898</td>
+                        <td>235.2353</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5a.8xlarge">
+                        <td>c5a.8xlarge</td>
+                        <td>4772.7867</td>
+                        <td>2381.2786</td>
+                        <td>2391.5081</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5a.large">
+                        <td>c5a.large</td>
+                        <td>24.5932</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>423.659</td>
+                        <td>478.9872</td>
+                        <td>-55.3282</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="m5.large">
+                        <td>m5.large</td>
+                        <td>41.8814</td>
+                        <td>2.9785</td>
+                        <td>38.9029</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="m5.xlarge">
+                        <td>m5.xlarge</td>
+                        <td>83.7861</td>
+                        <td>6.6335</td>
+                        <td>77.1526</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="m5a.8xlarge">
+                        <td>m5a.8xlarge</td>
+                        <td>1.2372</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="m5a.large">
+                        <td>m5a.large</td>
+                        <td>15.6229</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="m5a.xlarge">
+                        <td>m5a.xlarge</td>
+                        <td>31.2125</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="r6a.2xlarge">
+                        <td>r6a.2xlarge</td>
+                        <td>769.2316</td>
+                        <td>903.7993</td>
+                        <td>-134.5677</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="r6a.large">
+                        <td>r6a.large</td>
+                        <td>19.1328</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>49.3018</td>
+                        <td>52.7827</td>
+                        <td>-3.4809</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="t3.small">
+                        <td>t3.small</td>
+                        <td>4.8636</td>
+                        <td>7.0685</td>
+                        <td>-2.2049</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>22.2497</td>
+                        <td>23.7842</td>
+                        <td>-1.5345</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>48.9234</td>
+                        <td>67.6282</td>
+                        <td>-18.7048</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>3.5606</td>
+                        <td>17.9325</td>
+                        <td>-14.3719</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5.4xlarge">
+                        <td>c5.4xlarge</td>
+                        <td>0.062</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>33.5275</td>
+                        <td>272.4441</td>
+                        <td>-238.9166</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>0.7767</td>
+                        <td>2.5205</td>
+                        <td>-1.7438</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>2269.8585</td>
+                        <td>618.4251</td>
+                        <td>1651.4334</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5a.large">
+                        <td>c5a.large</td>
+                        <td>204.1552</td>
+                        <td>24.5932</td>
+                        <td>179.562</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>64.2512</td>
+                        <td>423.659</td>
+                        <td>-359.4078</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="m5a.large">
+                        <td>m5a.large</td>
+                        <td>57.2582</td>
+                        <td>15.6229</td>
+                        <td>41.6353</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="m5a.xlarge">
+                        <td>m5a.xlarge</td>
+                        <td>270.4314</td>
+                        <td>31.2125</td>
+                        <td>239.2189</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="r6a.large">
+                        <td>r6a.large</td>
+                        <td>165.6993</td>
+                        <td>19.1328</td>
+                        <td>146.5665</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>52.8538</td>
+                        <td>49.3018</td>
+                        <td>3.552</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="t3a.2xlarge">
+                        <td>t3a.2xlarge</td>
+                        <td>327.1571</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>23.7842</td>
+                        <td>22.2497</td>
+                        <td>1.5345</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>52.5537</td>
+                        <td>48.9234</td>
+                        <td>3.6303</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>0.0</td>
+                        <td>3.5606</td>
+                        <td>-3.5606</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>0.0</td>
+                        <td>33.5275</td>
+                        <td>-33.5275</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>0.0</td>
+                        <td>0.7767</td>
+                        <td>-0.7767</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>0.0</td>
+                        <td>2269.8585</td>
+                        <td>-2269.8585</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="c5a.large">
+                        <td>c5a.large</td>
+                        <td>0.0</td>
+                        <td>204.1552</td>
+                        <td>-204.1552</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>0.0</td>
+                        <td>64.2512</td>
+                        <td>-64.2512</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="m5a.large">
+                        <td>m5a.large</td>
+                        <td>0.0</td>
+                        <td>57.2582</td>
+                        <td>-57.2582</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="m5a.xlarge">
+                        <td>m5a.xlarge</td>
+                        <td>0.0</td>
+                        <td>270.4314</td>
+                        <td>-270.4314</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="r6a.large">
+                        <td>r6a.large</td>
+                        <td>0.0</td>
+                        <td>165.6993</td>
+                        <td>-165.6993</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="t2.medium">
+                        <td>t2.medium</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="t2.xlarge">
+                        <td>t2.xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>0.0</td>
+                        <td>52.8538</td>
+                        <td>-52.8538</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="t3a.2xlarge">
+                        <td>t3a.2xlarge</td>
+                        <td>0.0</td>
+                        <td>327.1571</td>
+                        <td>-327.1571</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>0.0</td>
+                        <td>23.7842</td>
+                        <td>-23.7842</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="t3a.xlarge">
+                        <td>t3a.xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>45.7014</td>
+                        <td>52.5537</td>
+                        <td>-6.8523</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>10.9897</td>
+                        <td>0.0</td>
+                        <td>10.9897</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>213.6173</td>
+                        <td>0.0</td>
+                        <td>213.6173</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>0.2383</td>
+                        <td>0.0</td>
+                        <td>0.2383</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>1681.1678</td>
+                        <td>0.0</td>
+                        <td>1681.1678</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="c5a.large">
+                        <td>c5a.large</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="m5a.large">
+                        <td>m5a.large</td>
+                        <td>57.2582</td>
+                        <td>0.0</td>
+                        <td>57.2582</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="m5a.xlarge">
+                        <td>m5a.xlarge</td>
+                        <td>114.5165</td>
+                        <td>0.0</td>
+                        <td>114.5165</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="r6a.large">
+                        <td>r6a.large</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t2.medium">
+                        <td>t2.medium</td>
+                        <td>29.51</td>
+                        <td>0.0</td>
+                        <td>29.51</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t2.micro">
+                        <td>t2.micro</td>
+                        <td>4.7744</td>
+                        <td>0.0002</td>
+                        <td>4.7742</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t2.xlarge">
+                        <td>t2.xlarge</td>
+                        <td>145.6529</td>
+                        <td>0.0</td>
+                        <td>145.6529</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>52.8538</td>
+                        <td>0.0</td>
+                        <td>52.8538</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t3a.2xlarge">
+                        <td>t3a.2xlarge</td>
+                        <td>600.0099</td>
+                        <td>0.0</td>
+                        <td>600.0099</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>23.7842</td>
+                        <td>0.0</td>
+                        <td>23.7842</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="t3a.xlarge">
+                        <td>t3a.xlarge</td>
+                        <td>1039.4715</td>
+                        <td>0.0</td>
+                        <td>1039.4715</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>19.8656</td>
+                        <td>45.7014</td>
+                        <td>-25.8358</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="c5.2xlarge">
+                        <td>c5.2xlarge</td>
+                        <td>19.3843</td>
+                        <td>10.9897</td>
+                        <td>8.3946</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="c5.xlarge">
+                        <td>c5.xlarge</td>
+                        <td>81.8292</td>
+                        <td>213.6173</td>
+                        <td>-131.7881</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="c5a.2xlarge">
+                        <td>c5a.2xlarge</td>
+                        <td>0.0235</td>
+                        <td>0.2383</td>
+                        <td>-0.2148</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="c5a.4xlarge">
+                        <td>c5a.4xlarge</td>
+                        <td>1434.2752</td>
+                        <td>1681.1678</td>
+                        <td>-246.8926</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="c5a.large">
+                        <td>c5a.large</td>
+                        <td>175.824</td>
+                        <td>0.0</td>
+                        <td>175.824</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="c5a.xlarge">
+                        <td>c5a.xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="m5a.large">
+                        <td>m5a.large</td>
+                        <td>21.9336</td>
+                        <td>57.2582</td>
+                        <td>-35.3246</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="m5a.xlarge">
+                        <td>m5a.xlarge</td>
+                        <td>43.8672</td>
+                        <td>114.5165</td>
+                        <td>-70.6493</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="r6a.large">
+                        <td>r6a.large</td>
+                        <td>144.6392</td>
+                        <td>0.0</td>
+                        <td>144.6392</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="t2.medium">
+                        <td>t2.medium</td>
+                        <td>11.3042</td>
+                        <td>29.51</td>
+                        <td>-18.2058</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="t2.xlarge">
+                        <td>t2.xlarge</td>
+                        <td>45.217</td>
+                        <td>145.6529</td>
+                        <td>-100.4359</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="t3.large">
+                        <td>t3.large</td>
+                        <td>20.2464</td>
+                        <td>52.8538</td>
+                        <td>-32.6074</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="t3a.2xlarge">
+                        <td>t3a.2xlarge</td>
+                        <td>291.5482</td>
+                        <td>600.0099</td>
+                        <td>-308.4617</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="t3a.medium">
+                        <td>t3a.medium</td>
+                        <td>9.1109</td>
+                        <td>23.7842</td>
+                        <td>-14.6733</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="t3a.xlarge">
+                        <td>t3a.xlarge</td>
+                        <td>434.4965</td>
+                        <td>1039.4715</td>
+                        <td>-604.975</td>
+                    </tr>
+                    
+                    <tr class="total-cost">
+                        <td>Total</td>
+                        <td id="total-instance-cost"></td>
+                        <td id="total-instance-previous-cost"></td>
+                        <td id="total-instance-cost-change"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table id="rds-instance-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Instance Type</th>
+                        <th>Current Month Cost ($)</th>
+                        <th>Previous Month Cost ($)</th>
+                        <th>Cost Change ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr data-month="2023-06-14" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>63.1936</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>122.5795</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-06-14" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>44.9861</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>111.5181</td>
+                        <td>63.1936</td>
+                        <td>48.3245</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>223.5274</td>
+                        <td>122.5795</td>
+                        <td>100.9479</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-07-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>304.9001</td>
+                        <td>44.9861</td>
+                        <td>259.914</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>96.6803</td>
+                        <td>111.5181</td>
+                        <td>-14.8378</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>223.5274</td>
+                        <td>223.5274</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-08-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>244.8689</td>
+                        <td>304.9001</td>
+                        <td>-60.0312</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>0.0</td>
+                        <td>96.6803</td>
+                        <td>-96.6803</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>0.0</td>
+                        <td>223.5274</td>
+                        <td>-223.5274</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="db.m6g.2xlarge">
+                        <td>db.m6g.2xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="db.m6g.4xlarge">
+                        <td>db.m6g.4xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="db.m6gd.4xlarge">
+                        <td>db.m6gd.4xlarge</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-09-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>0.0</td>
+                        <td>244.8689</td>
+                        <td>-244.8689</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>701.2874</td>
+                        <td>0.0</td>
+                        <td>701.2874</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m5.2xlarge">
+                        <td>db.m5.2xlarge</td>
+                        <td>36.2598</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m5.4xlarge">
+                        <td>db.m5.4xlarge</td>
+                        <td>72.5172</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>86.5876</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>316.1188</td>
+                        <td>0.0</td>
+                        <td>316.1188</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m5d.4xlarge">
+                        <td>db.m5d.4xlarge</td>
+                        <td>268.9437</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m6g.2xlarge">
+                        <td>db.m6g.2xlarge</td>
+                        <td>43.8479</td>
+                        <td>0.0</td>
+                        <td>43.8479</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.m6g.4xlarge">
+                        <td>db.m6g.4xlarge</td>
+                        <td>303.0836</td>
+                        <td>0.0</td>
+                        <td>303.0836</td>
+                    </tr>
+                    
+                    <tr data-month="2023-10-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>222.8667</td>
+                        <td>0.0</td>
+                        <td>222.8667</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>463.7133</td>
+                        <td>701.2874</td>
+                        <td>-237.5741</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.m5.2xlarge">
+                        <td>db.m5.2xlarge</td>
+                        <td>25.937</td>
+                        <td>36.2598</td>
+                        <td>-10.3228</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.m5.4xlarge">
+                        <td>db.m5.4xlarge</td>
+                        <td>374.7655</td>
+                        <td>72.5172</td>
+                        <td>302.2483</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1594.2371</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>63.4082</td>
+                        <td>86.5876</td>
+                        <td>-23.1794</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>216.3168</td>
+                        <td>316.1188</td>
+                        <td>-99.802</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>8.7616</td>
+                        <td>0.0</td>
+                        <td>8.7616</td>
+                    </tr>
+                    
+                    <tr data-month="2023-11-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>246.6135</td>
+                        <td>222.8667</td>
+                        <td>23.7468</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>476.7824</td>
+                        <td>463.7133</td>
+                        <td>13.0691</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1789.32</td>
+                        <td>1594.2371</td>
+                        <td>195.0829</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>111.7637</td>
+                        <td>63.4082</td>
+                        <td>48.3555</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>223.5274</td>
+                        <td>216.3168</td>
+                        <td>7.2106</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>81.4829</td>
+                        <td>8.7616</td>
+                        <td>72.7213</td>
+                    </tr>
+                    
+                    <tr data-month="2023-12-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>328.1338</td>
+                        <td>246.6135</td>
+                        <td>81.5203</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>476.8486</td>
+                        <td>476.7824</td>
+                        <td>0.0662</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1789.32</td>
+                        <td>1789.32</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>111.7637</td>
+                        <td>111.7637</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>223.5274</td>
+                        <td>223.5274</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="db.m6gd.large">
+                        <td>db.m6gd.large</td>
+                        <td>0.132</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>81.4829</td>
+                        <td>81.4829</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-01-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>328.1338</td>
+                        <td>328.1338</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>475.5008</td>
+                        <td>476.8486</td>
+                        <td>-1.3478</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1673.88</td>
+                        <td>1789.32</td>
+                        <td>-115.44</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>104.5531</td>
+                        <td>111.7637</td>
+                        <td>-7.2106</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="db.m5.xlarge">
+                        <td>db.m5.xlarge</td>
+                        <td>182.6735</td>
+                        <td>223.5274</td>
+                        <td>-40.8539</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="db.m6g.2xlarge">
+                        <td>db.m6g.2xlarge</td>
+                        <td>226.2572</td>
+                        <td>43.8479</td>
+                        <td>182.4093</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>76.2259</td>
+                        <td>81.4829</td>
+                        <td>-5.257</td>
+                    </tr>
+                    
+                    <tr data-month="2024-02-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>213.5778</td>
+                        <td>328.1338</td>
+                        <td>-114.556</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>221.4417</td>
+                        <td>475.5008</td>
+                        <td>-254.0591</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1789.32</td>
+                        <td>1673.88</td>
+                        <td>115.44</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>111.7637</td>
+                        <td>104.5531</td>
+                        <td>7.2106</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="db.m6g.2xlarge">
+                        <td>db.m6g.2xlarge</td>
+                        <td>397.5043</td>
+                        <td>226.2572</td>
+                        <td>171.2471</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>81.4829</td>
+                        <td>76.2259</td>
+                        <td>5.257</td>
+                    </tr>
+                    
+                    <tr data-month="2024-03-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>164.0669</td>
+                        <td>213.5778</td>
+                        <td>-49.5109</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>0.0003</td>
+                        <td>221.4417</td>
+                        <td>-221.4414</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>0.0</td>
+                        <td>1789.32</td>
+                        <td>-1789.32</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>0.0</td>
+                        <td>111.7637</td>
+                        <td>-111.7637</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="db.m6g.2xlarge">
+                        <td>db.m6g.2xlarge</td>
+                        <td>0.0</td>
+                        <td>397.5043</td>
+                        <td>-397.5043</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>0.0</td>
+                        <td>81.4829</td>
+                        <td>-81.4829</td>
+                    </tr>
+                    
+                    <tr data-month="2024-04-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>0.0</td>
+                        <td>164.0669</td>
+                        <td>-164.0669</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>182.4843</td>
+                        <td>0.0003</td>
+                        <td>182.484</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1674.9441</td>
+                        <td>0.0</td>
+                        <td>1674.9441</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>80.2175</td>
+                        <td>0.0</td>
+                        <td>80.2175</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="db.m6g.2xlarge">
+                        <td>db.m6g.2xlarge</td>
+                        <td>272.5306</td>
+                        <td>0.0</td>
+                        <td>272.5306</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="db.m6g.xlarge">
+                        <td>db.m6g.xlarge</td>
+                        <td>62.4868</td>
+                        <td>0.0</td>
+                        <td>0.0</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>81.4829</td>
+                        <td>0.0</td>
+                        <td>81.4829</td>
+                    </tr>
+                    
+                    <tr data-month="2024-05-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>164.0669</td>
+                        <td>0.0</td>
+                        <td>164.0669</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="NoInstanceType">
+                        <td>NoInstanceType</td>
+                        <td>72.2334</td>
+                        <td>182.4843</td>
+                        <td>-110.2509</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="db.m5.8xlarge">
+                        <td>db.m5.8xlarge</td>
+                        <td>1278.0826</td>
+                        <td>1674.9441</td>
+                        <td>-396.8615</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="db.m5.large">
+                        <td>db.m5.large</td>
+                        <td>0.0</td>
+                        <td>80.2175</td>
+                        <td>-80.2175</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="db.m6g.xlarge">
+                        <td>db.m6g.xlarge</td>
+                        <td>76.1349</td>
+                        <td>62.4868</td>
+                        <td>13.6481</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="db.t4g.medium">
+                        <td>db.t4g.medium</td>
+                        <td>31.2132</td>
+                        <td>81.4829</td>
+                        <td>-50.2697</td>
+                    </tr>
+                    
+                    <tr data-month="2024-06-01" data-instance="db.t4g.xlarge">
+                        <td>db.t4g.xlarge</td>
+                        <td>62.8482</td>
+                        <td>164.0669</td>
+                        <td>-101.2187</td>
+                    </tr>
+                    
+                    <tr class="total-cost">
+                        <td>Total</td>
+                        <td id="total-rds-instance-cost"></td>
+                        <td id="total-rds-instance-previous-cost"></td>
+                        <td id="total-rds-instance-cost-change"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function filterTable() {
+            var month = document.getElementById('month').value;
+            var service = document.getElementById('service').value;
+            var instance = document.getElementById('instance').value;
+            var rdsInstance = document.getElementById('rds-instance').value;
+            document.getElementById('selected-month').innerText = document.getElementById('month').options[document.getElementById('month').selectedIndex].text;
+            var overallRows = document.querySelectorAll('#overall-table tbody tr');
+            var instanceRows = document.querySelectorAll('#instance-table tbody tr');
+            var rdsInstanceRows = document.querySelectorAll('#rds-instance-table tbody tr');
+            
+            var totalOverallCost = 0, totalOverallPreviousCost = 0, totalOverallCostChange = 0;
+            var totalInstanceCost = 0, totalInstancePreviousCost = 0, totalInstanceCostChange = 0;
+            var totalRdsInstanceCost = 0, totalRdsInstancePreviousCost = 0, totalRdsInstanceCostChange = 0;
+
+            overallRows.forEach(row => {
+                if (!row.classList.contains('total-cost')) {
+                    var rowMonth = row.getAttribute('data-month');
+                    var rowService = row.getAttribute('data-service');
+                    if (rowMonth === month && (service === 'all' || rowService === service)) {
+                        row.style.display = '';
+                        totalOverallCost += parseFloat(row.cells[1].innerText);
+                        totalOverallPreviousCost += parseFloat(row.cells[2].innerText);
+                        totalOverallCostChange += parseFloat(row.cells[3].innerText);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            instanceRows.forEach(row => {
+                if (!row.classList.contains('total-cost')) {
+                    var rowInstance = row.getAttribute('data-instance');
+                    var rowMonth = row.getAttribute('data-month');
+                    if ((instance === 'all' || rowInstance === instance) && rowMonth === month) {
+                        row.style.display = '';
+                        totalInstanceCost += parseFloat(row.cells[1].innerText);
+                        totalInstancePreviousCost += parseFloat(row.cells[2].innerText);
+                        totalInstanceCostChange += parseFloat(row.cells[3].innerText);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            rdsInstanceRows.forEach(row => {
+                if (!row.classList.contains('total-cost')) {
+                    var rowRdsInstance = row.getAttribute('data-instance');
+                    var rowMonth = row.getAttribute('data-month');
+                    if ((rdsInstance === 'all' || rowRdsInstance === rdsInstance) && rowMonth === month) {
+                        row.style.display = '';
+                        totalRdsInstanceCost += parseFloat(row.cells[1].innerText);
+                        totalRdsInstancePreviousCost += parseFloat(row.cells[2].innerText);
+                        totalRdsInstanceCostChange += parseFloat(row.cells[3].innerText);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            document.getElementById('total-overall-cost').innerText = totalOverallCost.toFixed(4);
+            document.getElementById('total-overall-previous-cost').innerText = totalOverallPreviousCost.toFixed(4);
+            document.getElementById('total-overall-cost-change').innerText = totalOverallCostChange.toFixed(4);
+
+            document.getElementById('total-instance-cost').innerText = totalInstanceCost.toFixed(4);
+            document.getElementById('total-instance-previous-cost').innerText = totalInstancePreviousCost.toFixed(4);
+            document.getElementById('total-instance-cost-change').innerText = totalInstanceCostChange.toFixed(4);
+
+            document.getElementById('total-rds-instance-cost').innerText = totalRdsInstanceCost.toFixed(4);
+            document.getElementById('total-rds-instance-previous-cost').innerText = totalRdsInstancePreviousCost.toFixed(4);
+            document.getElementById('total-rds-instance-cost-change').innerText = totalRdsInstanceCostChange.toFixed(4);
+        }
+
+        function showOverallView() {
+            document.getElementById('overall-table').style.display = '';
+            document.getElementById('instance-table').style.display = 'none';
+            document.getElementById('rds-instance-table').style.display = 'none';
+            document.getElementById('service-selector').style.display = 'block';
+            document.getElementById('instance-selector').style.display = 'none';
+            document.getElementById('rds-instance-selector').style.display = 'none';
+        }
+
+        function showInstanceView() {
+            document.getElementById('overall-table').style.display = 'none';
+            document.getElementById('instance-table').style.display = '';
+            document.getElementById('rds-instance-table').style.display = 'none';
+            document.getElementById('service-selector').style.display = 'none';
+            document.getElementById('instance-selector').style.display = 'block';
+            document.getElementById('rds-instance-selector').style.display = 'none';
+        }
+
+        function showRdsInstanceView() {
+            document.getElementById('overall-table').style.display = 'none';
+            document.getElementById('instance-table').style.display = 'none';
+            document.getElementById('rds-instance-table').style.display = '';
+            document.getElementById('service-selector').style.display = 'none';
+            document.getElementById('instance-selector').style.display = 'none';
+            document.getElementById('rds-instance-selector').style.display = 'block';
+        }
+
+        filterTable();
+    </script>
+</body>
+</html>
