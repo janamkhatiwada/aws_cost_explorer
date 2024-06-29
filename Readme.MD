@@ -3,6 +3,21 @@ This applicatin creates a dashboard for aws cost comparison for last 24 months. 
 
 Also we can see each EC2 instances cost , RDS instances cost and compare them with previous months.
 
+### Screenshots of App
+
+## Overall Cost
+
+![Overall Cost](./SS/overall.png)
+
+## RDS Cost
+
+![RDS Cost](./SS/rds.png)
+
+## EC2 Cost
+
+![EC2 Cost](./SS/ec2.png)
+<Image src="./SS/ec2.png" alt="EC2 Cost" />
+
 #### Prerequisites
 
 - Python version 3.10 or higher installed on your host.
