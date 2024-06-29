@@ -7,7 +7,7 @@ Also we can see each EC2 instances cost , RDS instances cost and compare them wi
 
 ## Login Page
 
-![Login Page](./SS/overall.png)
+![Login Page](./SS/login.png)
 
 ## Overall Cost
 
