@@ -14,7 +14,6 @@ Also we can see each EC2 instances cost , RDS instances cost and compare them wi
 
 Create a user in aws and assign following IAM permission to that user.
 
-          ```
           {
               "Version": "2012-10-17",
               "Statement": [
@@ -29,7 +28,6 @@ Create a user in aws and assign following IAM permission to that user.
               ]
           }
           
-          ```
           
 #### Setup Instructions on Local
 
